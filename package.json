@@ -1,0 +1,24 @@
+{
+  "name": "auth",
+  "version": "1.0.0",
+  "description": "Micro service for handling auth",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.1.0",
+    "mysql2": "^3.14.3",
+    "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.1",
+    "nodmeon": "^0.0.1-security",
+    "sequelize-cli": "^6.6.3"
+  }
+}
