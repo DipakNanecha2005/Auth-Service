@@ -25,9 +25,23 @@ NODE_ENV=development #production
 
 # port
 PORT=5001
+
+# jwt key
+JWT_KEY=YOUR_JWT_KEY
+
+# Database Sync
+SYNC_DB=false # true
 ```
 
 > 💡 You can adjust the values as needed for your local setup.
+
+> **Tip:** Run the following command to generate a secure JWT key:
+>
+> ```bash
+> openssl rand -base64 10
+> ```
+>
+> Copy the output and paste it as the value for `JWT_KEY`. (No need to use quotes if the generated key contains only standard characters including `=`. However, if the key includes special characters like `@`, `$`, `\`, `+`, `spaces`, or any other `whitespaces`, wrap the value in quotes.)
 
 ### 3. Configure sequelize for MySQL
 

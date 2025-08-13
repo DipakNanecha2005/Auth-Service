@@ -1,5 +1,5 @@
 import db from "../models/index.js";
-const { User } = db;
+const { User, Role } = db;
 
 /**
  * This repository class interact with the User model
@@ -14,12 +14,23 @@ class UserRepository {
       const user = await User.findByPk(userId, {
         attributes: ["id", "email"],
       });
-      if (!user) {
-        const error = new Error(`User with id ${userId} not found.`);
-        error.statusCode = 404;
-        throw error;
-      }
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
 
+  /**
+   * Fetches a user from the database by its email.
+   * @param {string} userEmail - User email
+   */
+  async getByEmail(userEmail) {
+    try {
+      const user = await User.findOne({
+        where: {
+          email: userEmail,
+        },
+      });
       return user;
     } catch (error) {
       throw error;
@@ -61,6 +72,25 @@ class UserRepository {
       }
 
       return deleted;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Check if user is Admin
+   * @param {number} userId - user id
+   */
+  async isAdmin(userId) {
+    try {
+      const user = await User.findByPk(userId);
+      const adminRole = await Role.findOne({
+        where: {
+          name: "ADMIN",
+        },
+      });
+
+      return user.hasRole(adminRole);
     } catch (error) {
       throw error;
     }

@@ -1,5 +1,14 @@
 import express from "express";
-import { create } from "../../controllers/user-controller.js";
+import {
+  create,
+  logIn,
+  isAuthenticated,
+  isAdmin,
+} from "../../controllers/user-controller.js";
+import {
+  validateIsAdminRequest,
+  validateUserAuth,
+} from "../../middlewares/request-validation.js";
 
 /**
  * Router for version-1 API endpoints.
@@ -7,6 +16,9 @@ import { create } from "../../controllers/user-controller.js";
  */
 const router = express.Router();
 
-router.post("/register", create);
+router.post("/register", validateUserAuth, create);
+router.post("/login", validateUserAuth, logIn);
+router.get("/isAuthenticated", isAuthenticated);
+router.get("/isAdmin", validateIsAdminRequest, isAdmin);
 
 export default router;
