@@ -2,7 +2,7 @@ import { Model } from "sequelize";
 import bcrypt from "bcrypt";
 
 /**
- * @param {typeof import('sequelize')} Sequelize
+ * @param {typeof import('sequelize')} sequelize
  * @param {import('sequelize').DataTypes} DataTypes
  * @returns {typeof Model}
  */

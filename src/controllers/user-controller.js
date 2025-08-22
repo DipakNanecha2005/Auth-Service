@@ -1,4 +1,5 @@
 import { UserService } from "../services/user-service.js";
+import { Log } from "../utils/Log.js";
 
 /**
  * Register user
@@ -14,15 +15,17 @@ export const create = async (req, res) => {
       password: req.body.password,
     });
     res.status(201).json({
-      user,
+      data: user,
       success: true,
-      message: "Successfully created a user",
+      error: {},
+      message: "Successfully registered a user",
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Cannot create user right now.",
-      error: error.message,
+    Log.error(error);
+    res.status(error.statusCode).json({
+      message: error.message,
+      error: error.explanation,
+      data: {},
       success: false,
     });
   }
@@ -41,15 +44,17 @@ export const logIn = async (req, res) => {
     const result = await UserService.logIn(email, password);
 
     res.status(200).json({
-      token: result,
+      data: result,
       success: true,
-      message: "Successfully login a user",
+      error: {},
+      message: "Successfully logged in a user",
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Cannot login user right now.",
-      error: error.message,
+    Log.error(error);
+    res.status(error.statusCode).json({
+      message: error.message,
+      error: error.explanation,
+      data: {},
       success: false,
     });
   }
@@ -74,15 +79,19 @@ export const isAuthenticated = async (req, res) => {
     const response = await UserService.isAuthenticated(token);
 
     res.status(200).json({
-      response,
+      data: response,
       success: true,
+      error: {},
       message: "User is authenticated and token is valid",
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Something went wrong. Error in isAuthenticated controller.",
-      error: error.message,
+    Log.error(error);
+    res.status(error.statusCode).json({
+      message:
+        error.message ||
+        "Something went wrong. Error in isAuthenticated controller.",
+      error: error.explanation,
+      data: {},
       success: false,
     });
   }
@@ -100,15 +109,41 @@ export const isAdmin = async (req, res) => {
     const response = await UserService.isAdmin(req.body.id);
 
     res.status(200).json({
-      response,
+      data: response,
       success: true,
+      error: {},
       message: "User is authenticated and token is valid",
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Something went wrong. Error in isAdmin controller.",
-      error: error.message,
+    Log.error(error);
+    res.status(error.statusCode).json({
+      message:
+        error.message || "Something went wrong. Error in isAdmin controller.",
+      error: error.explanation,
+      data: {},
+      success: false,
+    });
+  }
+};
+
+/**
+ * Get user info
+ * @route GET /api/v1/user-info
+ * @param {import("express").Request} req - Express request object
+ * @param {import("express").Response} res - Express response object
+ * @access Authorized
+ */
+export const getUserInfo = async (req, res) => {
+  try {
+    // const user = await UserService.getUserInfo()
+  } catch (error) {
+    Log.error(error);
+    res.status(error.statusCode).json({
+      message:
+        error.message ||
+        "Something went wrong. Error in getUserInfo controller.",
+      error: error.explanation,
+      data: {},
       success: false,
     });
   }

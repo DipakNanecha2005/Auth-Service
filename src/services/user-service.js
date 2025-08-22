@@ -2,6 +2,9 @@ import { JWT_KEY } from "../config/serverConfig.js";
 import { userRepositoryInstance } from "../repository/user-repository.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { ServiceError } from "../utils/errors/Service-Error.js";
+import { ClientError } from "../utils/errors/Client-Error.js";
+import e from "express";
 
 /**
  * Service class for User operations.
@@ -17,6 +20,26 @@ class UserService {
   }
 
   /**
+   * Get User info
+   * @param {number | string} userId - user id
+   */
+  async getUserInfo(userId) {
+    try {
+      const user = await this.#userRepository.getUserById(userId);
+      return user;
+    } catch (error) {
+      if (["AttributeNotFound", "RepositoryError"].includes(error.name)) {
+        throw error;
+      }
+
+      throw new ServiceError(
+        "Cannot get user data.",
+        `Somethiing went wrong in service layer: ${error.message}`
+      );
+    }
+  }
+
+  /**
    * Creates a new user.
    * @param {{
    *  email: string
@@ -25,10 +48,19 @@ class UserService {
    */
   async createUser(data) {
     try {
-      const user = await this.#userRepository.create(data);
+      const user = await this.#userRepository.createUser(data);
       return user;
     } catch (error) {
-      throw error;
+      if (
+        ["SequelizeValidationError", "RepositoryError"].includes(error.name)
+      ) {
+        throw error;
+      }
+
+      throw new ServiceError(
+        "Cannot create user.",
+        `Somethiing went wrong in service layer: ${error.message}`
+      );
     }
   }
 
@@ -82,13 +114,16 @@ class UserService {
    */
   async logIn(email, password) {
     try {
-      const user = await this.#userRepository.getByEmail(email);
+      const user = await this.#userRepository.getUserByEmail(email);
 
       const isPasswordValid = this.#checkPassword(password, user.password);
       if (!isPasswordValid) {
-        const error = new Error("Incorrect password");
-        error.statusCode = 400;
-        throw error;
+        throw new ClientError(
+          "InvalidAttribute",
+          "Invalid password",
+          "Invalid password",
+          400
+        );
       }
 
       const token = this.#createToken({
@@ -97,7 +132,18 @@ class UserService {
       });
       return token;
     } catch (error) {
-      throw error;
+      if (
+        ["AttributeNotFound", "RepositoryError", "InvalidAttribute"].includes(
+          error.name
+        )
+      ) {
+        throw error;
+      }
+
+      throw new ServiceError(
+        "Cannot login user",
+        `Somethiing went wrong in service layer: ${error.message}`
+      );
     }
   }
 
@@ -109,32 +155,49 @@ class UserService {
     try {
       const response = this.#verifyToken(token);
       if (!response) {
-        const error = new Error("Invalid token");
-        error.statusCode(401);
+        throw new ClientError(
+          "NotAuthorized",
+          "Invalid token",
+          "Invalid token or token expired.",
+          401
+        );
+      }
+
+      const user = await this.#userRepository.getUserById(response.id);
+
+      return user.id;
+    } catch (error) {
+      if (
+        ["AttributeNotFound", "RepositoryError", "NotAuthorized"].includes(
+          error.name
+        )
+      ) {
         throw error;
       }
 
-      const user = await this.#userRepository.get(response.id);
-      if (!user) {
-        const error = new Error("No user with corresponding token exists.");
-        error.statusCode(401);
-        throw error;
-      }
-      return user.id;
-    } catch (error) {
-      throw error;
+      throw new ServiceError(
+        "Something went wrong.",
+        `Somethiing went wrong in isAuthenticated service layer: ${error.message}`
+      );
     }
   }
 
   /**
    * Check if the user is Admin
-   * @param {number} userId - user id
+   * @param {number | string} userId - user id
    */
   async isAdmin(userId) {
     try {
       return this.#userRepository.isAdmin(userId);
     } catch (error) {
-      throw error;
+      if (["AttributeNotFound", "RepositoryError"].includes(error.name)) {
+        throw error;
+      }
+
+      throw new ServiceError(
+        "Something went wrong.",
+        `Somethiing went wrong in isAdmin service layer: ${error.message}`
+      );
     }
   }
 }

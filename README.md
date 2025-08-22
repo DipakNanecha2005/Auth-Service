@@ -77,7 +77,15 @@ Run Sequelize migrations to create the necessary tables:
 npx sequelize db:migrate
 ```
 
-### 6. Start the service
+### 6. Seed the Database
+
+Populate the database with initial data:
+
+```bash
+npx sequelize db:seed:all
+```
+
+### 7. Start the service
 
 Now start the server:
 
